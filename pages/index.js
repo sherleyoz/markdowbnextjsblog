@@ -4,9 +4,11 @@ import path from 'path'
 import matter from 'gray-matter'
 import { NextSeo } from 'next-seo';
 import Post from '../components/Post'
-import Banner from "../components/Banner";
-import Sidebar from "../components/Sidebar"
+import HeroSlider from "../components/HeroSilder";
 import { sortByDate, slugify,ImageUrl} from '../utils'
+
+import FeaturedPosts from '../components/FeaturedPosts';
+import Categories from '../components/Categories/Categories';
 
 export default function Home({ posts }) {
 
@@ -14,12 +16,12 @@ export default function Home({ posts }) {
   return (
     <div>
       <NextSeo
-        title="Welcome to my blog home page"
-        description="Build nextjs blog website with Markdown, sitemap, serachbar, category, tag and SEO support"
+        title="Welcome to Study4JPSC"
+        description="Clear JPSC"
         openGraph={{
-          url: 'http://officialrajdeepsingh.dev',
-          title: 'Welcome to my blog home page',
-          description: 'Build nextjs blog website with Markdown, sitemap, serachbar, category, tag and SEO support',
+          url: 'http://study4jpsc.com',
+          title: 'Welcome to Study4JPSC',
+          description: 'Clear JPSC',
           images: [
             {
               url: `${ImageUrl('banner.png')}`,
@@ -29,26 +31,12 @@ export default function Home({ posts }) {
               type: 'image/jpeg',
             },
           ],
-          site_name: 'Rajdeep Singh',
+          site_name: 'Study4JPSC',
         }}      
       />
-        <Banner /> 
-      <div className="container">
-        <div className="row">
-
-          <div className="col-lg-8">
-
-            {posts.map((post, index) => (
-              <Post key={index} post={post} />
-            ))}
-
-
-          </div>
-
-          <Sidebar />
-          
-        </div>
-      </div>
+        <HeroSlider /> 
+        <FeaturedPosts />
+        <Categories />
     </div>
   )
 }
@@ -57,14 +45,11 @@ export async function getStaticProps() {
   // Get files from the posts dir
   const files = fs.readdirSync(path.join('posts'))
 
- 
-
-  
 
   // Get slug and frontmatter from posts
   const tempPosts = files.map((filename) => {
     // Create slug
-    const slug = filename.replace('.md', '')
+    const slug = filename.replace('.mdx', '')
 
     // Get frontmatter
     const markdownWithMeta = fs.readFileSync(
@@ -73,7 +58,6 @@ export async function getStaticProps() {
     )
 
     const { data: frontmatter } = matter(markdownWithMeta)
-
 
     if (frontmatter.draft === false) {
       return {
@@ -106,9 +90,4 @@ export async function getStaticProps() {
       posts: posts.sort(sortByDate),
     },
   }
-
-
 }
-
-
- 

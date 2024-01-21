@@ -1,138 +1,135 @@
-import fs from 'fs'
-import path from 'path'
-import matter from 'gray-matter'
-import { marked } from 'marked'
-import Link from 'next/link'
-import { slugify, ImageUrl } from '../../utils'
-import { NextSeo } from 'next-seo';
+import fs from "fs";
+import path from "path";
+import matter from "gray-matter";
+import { marked } from "marked";
+import Link from "next/link";
+import Image from "next/image";
+import { slugify, ImageUrl } from "../../utils";
+import { NextSeo } from "next-seo";
+
+// import CategoryCloud from "../../components/CategoryCloud";
+// import TagsCloud from "../../components/TagsCloud";
 
 export default function PostPage({ content, frontmatter }) {
-  const date = new Date(frontmatter.date)
-  const imageMeta= frontmatter.images.map(
-      image  =>  {
-       const imageUrl =  ImageUrl(image)
-        return {
-        url: imageUrl,
-        width: 1224,
-        height: 724,
-        alt: frontmatter.title,
-        type: 'image/jpeg',
-      }
-     }
-    )
+  const date = new Date(frontmatter.pubDate);
+  // const imageMeta= frontmatter.images.map(
+  //     image  =>  {
+  //      const imageUrl =  ImageUrl(image)
+  //       return {
+  //       url: imageUrl,
+  //       width: 1224,
+  //       height: 724,
+  //       alt: frontmatter.title,
+  //       type: 'image/jpeg',
+  //     }
+  //    }
+  //   )
 
-   
   return (
     <>
-     <NextSeo
-        title={frontmatter.title} 
+      <NextSeo
+        title={frontmatter.title}
         description={frontmatter.summary}
         openGraph={{
-          url: 'https:officialrajdeepsingh.dev',
+          url: "https://study4jpsc.com",
           title: frontmatter.title,
-          description: frontmatter.summary ,
-          type: 'article',
+          description: frontmatter.summary,
+          type: "article",
           article: {
-            publishedTime: frontmatter.date,
-            authors: [
-              'https://officialrajdeepsingh.dev/pages/about',
-            ],
+            publishedTime: frontmatter.pubDate,
+            authors: ["Study4JPSC"],
             tags: frontmatter.tags,
           },
-          images: imageMeta,
-          site_name: 'Rajdeep Singh',
-        }}      
+          // images: imageMeta,
+          site_name: "Study4JPSC",
+        }}
       />
-      <div className="container my-5">
-        <div className="row">
-          <div className="col-lg-10 m-auto">
-            <div className='card card-page'>
-              <a href={`/blog/${frontmatter.slug}`} > <img className="card-img-top" src={ImageUrl(frontmatter.image)} alt="..." /></a>
+      <main id="main">
+        <section className="single-post-content">
+          <div className="container">
+            <div className="row">
+              <div className="col-md-9 post-content">
+                <div className="single-post">
+                  <div className="post-meta">
+                    <span className="date">{frontmatter.category}</span>
+                    <span className="mx-1">&bullet;</span>
+                    <span>{frontmatter.pubDate}</span>
+                  </div>
+                  <h1 className="mb-5">{frontmatter.title}</h1>
 
-              <h1 className='post-title mt-2 p-2'>{frontmatter.title}</h1>
-              <div className='post-date m-1 p-2'>
+                  <figure className="my-4">
+                    <Image
+                      src={frontmatter.image}
+                      alt=""
+                      className="img-fluid"
+                      width={500}
+                      height={300}
+                    />
+                  </figure>
 
-                <div><h6>{`${date.getMonth() + 1} - ${date.getDate()} - ${date.getFullYear()}`} </h6>  </div>
-                <div> {
-                  frontmatter.categories.map(
-                    category => {
-
-                      const slug = slugify(category)
-
-                      return (<Link key={category} href={`/category/${slug}`}>
-                        <a className='btn'>
-                          <h6 className=' post-title'>#{category}</h6>
-                        </a>
-                      </Link>)
-                    }
-                  )
-                } </div>
-
-
+                  <div
+                    className=""
+                    dangerouslySetInnerHTML={{ __html: marked.parse(content) }}
+                  ></div>
+                </div>
               </div>
 
-              <div className='post-body p-5 m-auto' dangerouslySetInnerHTML={{ __html: marked.parse(content) }}>
-
+              <div className="col-md-3">
+                {/* <RelatedPosts {relatedPosts} /> */}
+                {/* <CategoryCloud />
+                <TagsCloud /> */}
               </div>
             </div>
           </div>
-        </div>
-      </div>
+        </section>
+      </main>
     </>
-  )
+  );
 }
-
 
 export async function getStaticPaths() {
   //  Get files from the posts dir
-  const files = fs.readdirSync(path.join('posts'))
+  const files = fs.readdirSync(path.join("posts"));
 
-   // Get slug and frontmatter from posts
+  // Get slug and frontmatter from posts
   const temppaths = files.map((filename) => {
-
     // Get frontmatter
     const markdownWithMeta = fs.readFileSync(
-      path.join('posts', filename),
-      'utf-8'
-    )
+      path.join("posts", filename),
+      "utf-8"
+    );
 
-    const { data: frontmatter } = matter(markdownWithMeta)
+    const { data: frontmatter } = matter(markdownWithMeta);
+    console.log(frontmatter.image);
 
     if (frontmatter.draft === false) {
       return {
         params: {
-          slug: filename.replace('.md', ''),
+          slug: filename.replace(".mdx", ""),
         },
-      }
+      };
     } else {
-      return null
+      return null;
     }
-
-
-  })
-  //   remove null in tempPosts 
-  const paths = temppaths.filter(
-    path => {
-      return path && path
-    }
-  )
+  });
+  //   remove null in tempPosts
+  const paths = temppaths.filter((path) => {
+    return path && path;
+  });
 
   return {
     paths,
     fallback: false,
-  }
-
+  };
 }
 
-
 export async function getStaticProps({ params: { slug } }) {
-
   const markdownWithMeta = fs.readFileSync(
-    path.join('posts', slug + '.md'),
-    'utf-8'
-  )
+    path.join("posts", slug + ".mdx"),
+    "utf-8"
+  );
 
-  const { data: frontmatter, content } = matter(markdownWithMeta)
+  const { data: frontmatter, content } = matter(markdownWithMeta);
 
   return {
     props: {
@@ -140,5 +137,5 @@ export async function getStaticProps({ params: { slug } }) {
       slug,
       content,
     },
-  }
+  };
 }
